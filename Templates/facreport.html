@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reports - KTU Activity Point Management</title>
+    <link rel="stylesheet" href="/static/facdash.css" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+  </head>
+  <body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-logo"><h2>KTU Activity Point System</h2></div>
+      <nav class="sidebar-menu">
+        <a href="{{ url_for('faculty_dashboard') }}" class="menu-item"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+        <a href="{{ url_for('students') }}" class="menu-item"><i class="fas fa-user-graduate"></i> Students</a>
+        <a href="{{ url_for('faculty_activities') }}" class="menu-item "><i class="fas fa-clipboard-check"></i> Activities</a>
+        <a href="{{ url_for('faculty_reports') }}" class="menu-item active"><i class="fas fa-file-alt"></i> Reports</a>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+
+      <section class="reports-section">
+        <h1 class="page-title">Generate Reports</h1>
+        <div class="filter-container">
+          <select style="width: 100px;border-radius: 4px;" id="batchFilter">
+            <option value="all">All Batches</option>
+          </select>
+          <select style="width: 100px;border-radius: 4px;" id="semesterFilter">
+            <option value="all">All Semesters</option>
+          </select>
+          <select style="width: 100px;border-radius: 4px;" id="activityTypeFilter">
+            <option value="all">All Activities</option>
+          </select>
+          <button onclick="fetchActivities()" class="filter-btn"> Apply Filters</button>
+        </div>
+
+        <table class="report-table">
+          <thead>
+            <tr>
+              <th>Student Name</th>
+              <th>Batch</th>
+              <th>Activity Type</th>
+              <th>Total Points</th>
+            </tr>
+          </thead>
+          <tbody id="reportData"></tbody>
+        </table>
+
+        <div class="export-buttons">
+          <button onclick="generatePDF()"><i class="fas fa-file-pdf"></i> Export as PDF</button>
+          <button onclick="generateExcel()"><i class="fas fa-file-excel"></i> Export as Excel</button>
+        </div>
+      </section>
+    </main>
+
+    <script src="report_script.js"></script>
+  </body>
+</html>

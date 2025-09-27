@@ -1,0 +1,35 @@
+#bd{
+    padding-top: 5rem;
+    padding-bottom: 3rem;
+    color: white;
+}
+#card{
+    border-color: #6FACF5;
+    border-width: .1rem;
+    border-bottom-left-radius: 1rem;
+    border-bottom-right-radius: 1rem;
+    border-top-left-radius: 0%;
+    border-top-right-radius: 0%;
+    color: #6FACF5;
+}
+.heading{
+    background-color: #6FACF5;
+    border-top-left-radius: .7rem;
+    border-top-right-radius: .7rem;
+}
+#button{
+    background-color: #039838;
+    margin-top: 2rem;
+    color: white;
+}
+.login {
+    margin-top: 1rem;
+    color: black;
+}
+
+
+/*
+    margin-top: -1.5rem;
+    margin-left: -1.5rem;
+    height: 4rem;
+    width: 34.7rem;

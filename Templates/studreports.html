@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports - KTU Activity Point Management System</title>
+    <link rel="stylesheet" href="/static/studrep.css">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h2>KTU Activity Point Management System</h2>
+        <nav>
+             <a href="{{ url_for('student_dashboard') }}" class="menu-item "><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+            <a href="{{ url_for('activity_submission') }}" class="menu-item"><i class="fas fa-baa-aa"></i> Activity submission</a>
+            <a href="{{ url_for('reports') }}" class="menu-item active"><i class="fas fa-chart-bar"></i> Reports</a>
+        </nav>
+    </div>
+
+    <!-- Topbar -->
+    <header class="topbar">
+        <div class="user-info">
+            <i class="fas fa-user-circle"></i>
+            <span id="student-name">{{ session['user_name'] }}</span>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="content">
+        <div class="filter-container">
+            <h2>Download Activity Report</h2>
+
+            <div class="form-group">
+                <label for="semester">Select Semester:</label>
+                <select id="semester">
+                    <option value="">-- Select Semester --</option>
+                    <option value="1">Semester 1</option>
+                    <option value="2">Semester 2</option>
+                    <option value="3">Semester 3</option>
+                    <option value="4">Semester 4</option>
+                    <option value="5">Semester 5</option>
+                    <option value="6">Semester 6</option>
+                    <option value="7">Semester 7</option>
+                    <option value="8">Semester 8</option>
+                </select>
+            </div>
+
+           <div class="form-group">
+    <label for="activity">Select Activity Type:</label>
+    <select id="activity">
+        <option value="">-- Select Activity --</option>
+        {% for activity in activities %}
+            <option value="{{ activity.id }}">{{ activity.name }}</option>
+        {% endfor %}
+    </select>
+</div>
+
+
+            <button class="pdf-btn" onclick="downloadPDF()">Download PDF</button>
+        </div>
+    </main>
+
+    <script>
+        function downloadPDF() {
+    const semester = document.getElementById("semester").value;
+    const activityId = document.getElementById("activity").value;
+
+    if (!semester || !activityId) {
+        alert("Please select both semester and activity type.");
+        return;
+    }
+
+    window.location.href = `/generate_pdf?semester=${semester}&activity_id=${activityId}`;
+}
+
+    </script>
+</body>
+</html>

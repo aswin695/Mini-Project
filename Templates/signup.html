@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign-Up Page</title>
+    <link rel="stylesheet" href="static/signup.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script>
+        function updateFormFields() {
+            var userType = document.getElementById("userType").value;
+            document.getElementById("studentFields").style.display = userType === "Student" ? "block" : "none";
+            document.getElementById("facultyFields").style.display = userType === "Faculty" ? "block" : "none";
+            document.getElementById("hodFields").style.display = userType === "HOD" ? "block" : "none";
+        }
+    </script>
+</head>
+<body  id="bd">
+    <div class="container mt-5">
+        <div class="heading p-3 shadow col-11 col-sm-11 col-md-8 col-lg-7 col-xl-6 mx-auto"><h2 class="text-center">Sign-Up</h2></div>
+<div class="card p-4 shadow col-11 col-sm-11 col-md-8 col-lg-7 col-xl-6 mx-auto" id="card">
+
+            <form id="form" action="{{ url_for('signup') }}" method="POST">
+                <div class="mb-3">
+                    <label for="userType" class="form-label">Select User Type</label>
+                    <select name="role" id="userType" class="form-select" onchange="updateFormFields()">
+                        <option value="" disabled selected>Choose...</option>
+                        <option value="Student">Student</option>
+                        <option value="Faculty">Faculty</option>
+                        <option value="HOD">HOD</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="name" class="form-label">Full Name</label>
+                    <input name="name" type="text" class="form-control" id="name" placeholder="Enter your full name">
+                </div>
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input name="email" type="email" class="form-control" id="email" placeholder="Enter your email">
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <input name="password" type="password" class="form-control" id="password" placeholder="Enter your password">
+                </div>
+
+                <div id="studentFields" style="display: none;">
+                    <div class="mb-3">
+                        <label for="studentID" class="form-label">Student ID</label>
+                        <input name="stdid" type="text" class="form-control" id="studentID" placeholder="Enter your Student ID">
+                    </div>
+                    <div class="mb-3">
+                        <label for="department" class="form-label">Department</label>
+                        <select name="dept" id="std_department" class="form-select">
+                            <option value="" disabled selected>Enter your department</option>
+                            <option value="AI&DS">AI&DS</option>
+                            <option value="CSE">CSE</option>
+                            <option value="ECE">ECE</option>
+                            <option value="EEE">EEE</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                       <label for="batch" class="form-label">Batch</label>
+                       <select name="batch" id="studentBatch" class="form-select">
+                           <option value="" disabled selected>Select Batch</option>
+                           <option value="2021-2025">2021-2025</option>
+                           <option value="2022-2026">2022-2026</option>
+                           <option value="2023-2027">2023-2027</option>
+                           <option value="2024-2028">2024-2028</option>
+                       </select>
+                   </div>
+
+                </div>
+
+                <div id="facultyFields" style="display: none;">
+                    <div class="mb-3">
+                         <label for="facultyID" class="form-label">Faculty ID</label>
+                         <input name="faculty_id" type="text" class="form-control" id="facultyID" placeholder="Enter your Faculty ID">
+                    </div>
+                <div class="mb-3">
+                    <label for="inchargeBatch" class="form-label">Batch In Charge</label>
+                    <select name="incharge_batch" id="inchargeBatch" class="form-select">
+                          <option value="" disabled selected>Select Batch</option>
+                          <option value="2021-2025">2021-2025</option>
+                          <option value="2022-2026">2022-2026</option>
+                          <option value="2023-2027">2023-2027</option>
+                          <option value="2024-2028">2024-2028</option>
+                    </select>
+                </div>
+                    <div class="mb-3">
+        <label for="department" class="form-label">Department</label>
+        <select name="dept" id="fac_department" class="form-select">
+            <option value="" disabled selected>Select your department</option>
+            <option value="CSE">CSE</option>
+            <option value="ECE">ECE</option>
+            <option value="EEE">EEE</option>
+        </select>
+    </div>
+                </div>
+
+
+                
+                <div id="hodFields" style="display: none;">
+                    <div class="mb-3">
+                        <label for="hodID" class="form-label">HOD ID</label>
+                        <input name="hod_id" type="text" class="form-control" id="hodID" placeholder="Enter your HOD ID">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="department" class="form-label">Department</label>
+                        <select name="dept" id="fac_department" class="form-select">
+                            <option value="" disabled selected>Enter your department</option>
+                            <option value="CSE">CSE</option>
+                            <option value="ECE">ECE</option>
+                            <option value="EEE">EEE</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100" id="button">Sign Up</button>
+                <p class="login">Have an Account?  <a href=""> Log In</a></p>
+            </form>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.js"></script>
+    <script src="signup.js"></script>
+</body>
+</html>

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Student Management</title>
+    <link rel="stylesheet" href="/static/facdash.css" />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo"><h2>KTU Activity Point System</h2></div>
+      <nav class="sidebar-menu">
+        <a href="{{ url_for('faculty_dashboard') }}" class="menu-item"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+        <a href="{{ url_for('students') }}" class="menu-item active"><i class="fas fa-user-graduate"></i> Students</a>
+        <a href="{{ url_for('faculty_activities') }}" class="menu-item "><i class="fas fa-clipboard-check"></i> Activities</a>
+        <a href="{{ url_for('faculty_reports') }}" class="menu-item"><i class="fas fa-file-alt"></i> Reports</a>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <section id="students" class="section">
+        <h1 class="page-title">Student Management</h1>
+        <div class="filter-section">
+          <select style="width: 200px; border-radius: 5px;" id="batch">
+            <option value="all">All Batches</option>
+          </select>
+          <button id="applyFilters" class="btn btn-primary">
+            <i class="fas fa-search"></i> Apply Filters
+          </button>
+        </div>
+        <div class="student-list" id="studentContainer"></div>
+      </section>
+    </main>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        loadBatches();
+        loadStudents();
+        document
+          .getElementById("applyFilters")
+          .addEventListener("click", loadStudents);
+      });
+
+      function loadBatches() {
+        const batchSelect = document.getElementById("batch");
+        const batches = ["2022", "2023", "2024"];
+        batches.forEach((batch) => {
+          const option = document.createElement("option");
+          option.value = batch;
+          option.textContent = batch;
+          batchSelect.appendChild(option);
+        });
+      }
+
+      async function loadStudents() {
+    const response = await fetch("/get_students");
+    const students = await response.json();
+
+    const container = document.getElementById("studentContainer");
+    container.innerHTML = students.length ? "" : "<p>No students found</p>";
+
+    students.forEach(student => {
+        const studentCard = document.createElement("div");
+        studentCard.classList.add("student-card"); // Ensure this class is styled in CSS
+        studentCard.innerHTML = `
+            <div class="student-avatar">${student.name.charAt(0)}</div>
+            <div class="student-info">
+                <h3>${student.name}</h3>
+                <p>Student ID: ${student.student_id}</p>
+                <p>Department: ${student.department}</p>
+            </div>`;
+        container.appendChild(studentCard);
+    });
+}
+
+
+      function getStudentsFromDatabase(batch) {
+        const allStudents = [
+          {
+            name: "Arun S Kumar",
+            course: "S7 CSE (2022-2026)",
+            initials: "AS",
+            points: 120,
+          },
+          {
+            name: "Ria J Thomas",
+            course: "S3 ECE (2023-2027)",
+            initials: "RJ",
+            points: 80,
+          },
+          {
+            name: "Vineeta M",
+            course: "S5 ME (2022-2026)",
+            initials: "VM",
+            points: 95,
+          },
+          {
+            name: "Karthika R M",
+            course: "S1 EEE (2024-2028)",
+            initials: "KR",
+            points: 60,
+          },
+        ];
+        // const allStudents = await fetch("/students", {
+        //   method: "GET",
+        //   header: { "Content-Type": "applications/json" },
+        // });
+        return batch === "all"
+          ? allStudents
+          : allStudents.filter((s) => s.course.includes(batch));
+      }
+    </script>
+  </body>
+</html>

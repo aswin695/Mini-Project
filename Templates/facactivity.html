@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>KTU Activity Point Management - Activities</title>
+    <link rel="stylesheet" href="/static/facdash.css" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+  </head>
+  <body>
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo"><h2>KTU Activity Point System</h2></div>
+      <nav class="sidebar-menu">
+        <a href="{{ url_for('faculty_dashboard') }}" class="menu-item"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+        <a href="{{ url_for('students') }}" class="menu-item"><i class="fas fa-user-graduate"></i> Students</a>
+        <a href="{{ url_for('faculty_activities') }}" class="menu-item active"><i class="fas fa-clipboard-check"></i> Activities</a>
+        <a href="{{ url_for('faculty_reports') }}" class="menu-item"><i class="fas fa-file-alt"></i> Reports</a>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+
+      <div class="dashboard">
+        <h1 class="page-title">Activity Management</h1>
+        <div class="filter-container">
+          <select style="width: 100px;border-radius: 4px;" id="batchFilter">
+            <option value="all">All Batches</option>
+          </select>
+          <select style="width: 100px;border-radius: 4px;" id="semesterFilter">
+            <option value="all">All Semesters</option>
+          </select>
+          <select style="width: 100px;border-radius: 4px;" id="activityTypeFilter">
+            <option value="all">All Activities</option>
+          </select>
+          <button onclick="fetchActivities()" class="filter-btn"> Apply Filters</button>
+        </div>
+
+        <div class="activity-table-container">
+          <table class="activity-table">
+            <thead>
+              <tr>
+                <th>Student Name</th>
+                <th>Batch</th>
+                <th>Semester</th>
+                <th>Activity Type</th>
+                <th>Approved Points</th>
+              </tr>
+            </thead>
+            <tbody id="activityList">
+               {% for activity in activities %}
+               <tr>
+                 <td>{{ activity.student_name }}</td>
+                 <td>{{ activity.batch }}</td>
+                 <td>{{ activity.semester }}</td>
+                 <td>{{ activity.activity_type }}</td>
+                 <td>{{ activity.approved_points }}</td>
+               </tr>
+               {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      async function fetchActivities() {
+        const batch = document.getElementById("batchFilter").value;
+        const semester = document.getElementById("semesterFilter").value;
+        const activityType = document.getElementById("activityTypeFilter").value;
+
+        const response = await fetch(`/getApprovedActivities?batch=${batch}&semester=${semester}&activityType=${activityType}`);
+        const data = await response.json();
+
+        const tableBody = document.getElementById("activityList");
+        tableBody.innerHTML = "";
+
+        data.forEach((activity) => {
+          const row = `<tr>
+                        <td>${activity.student_name}</td>
+                        <td>${activity.batch}</td>
+                        <td>${activity.semester}</td>
+                        <td>${activity.activity_type}</td>
+                        <td>${activity.approved_points}</td>
+                      </tr>`;
+          tableBody.innerHTML += row;
+        });
+      }
+
+      document.addEventListener("DOMContentLoaded", fetchActivities);
+    </script>
+  </body>
+</html>

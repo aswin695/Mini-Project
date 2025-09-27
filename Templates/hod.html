@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HOD Dashboard - KTU Activity Points</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Add these after existing script tags -->
+    <!-- Replace the existing jspdf script with these two -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.6.0/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #1a237e;
+            --secondary-color: #303f9f;
+            --sidebar-width: 250px;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        .sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            background-color: var(--primary-color);
+            color: white;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 0.8rem 1rem;
+            transition: all 0.3s;
+        }
+
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            color: white;
+            background-color: var(--secondary-color);
+        }
+
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 20px;
+            transition: all 0.3s;
+        }
+
+        .header {
+            background-color: white;
+            border-bottom: 1px solid #dee2e6;
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 900;
+        }
+
+        .dashboard-section {
+            display: none;
+        }
+
+        .dashboard-section.active {
+            display: block;
+        }
+
+        .stat-card {
+            transition: transform 0.2s;
+            border: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+        }
+        /* Add these styles to the existing style section */
+    .faculty-status {
+        font-size: 0.85rem;
+        padding: 0.35rem 0.7rem;
+    }
+
+    .btn-approve {
+        background-color: #28a745;
+        color: white;
+        transition: all 0.3s ease;
+    }
+
+    .btn-approve:hover {
+        background-color: #218838;
+        color: white;
+    }
+
+    .btn-remove {
+        background-color: #dc3545;
+        color: white;
+        transition: all 0.3s ease;
+    }
+
+    .btn-remove:hover {
+        background-color: #bb2d3b;
+        color: white;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: #f8f9fa;
+        cursor: pointer;
+    }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                margin-left: calc(var(--sidebar-width) * -1);
+            }
+
+            .sidebar.active {
+                margin-left: 0;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+        }
+
+        /* Add these new styles */
+    .semester-card {
+        transition: all 0.3s ease;
+        cursor: pointer;
+        min-height: 16rem;
+        width: 500px;
+        display: flex;
+        margin-left: 80px;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .semester-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+    }
+
+    #maindiv{
+        display: flex;
+        column-gap: 15rem;
+    }
+
+    .semester-card::after {
+        content: "";
+        position: absolute;
+        bottom: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(45deg, transparent 50%, rgba(255,255,255,0.15) 50%);
+        transform: rotate(45deg);
+        transition: all 0.3s ease;
+    }
+
+    .semester-card:hover::after {
+        bottom: -30%;
+        left: -30%;
+    }
+
+    .semester-number {
+        font-size: 5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .semester-status {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        font-size: 0.8rem;
+        padding: 3px 8px;
+        border-radius: 15px;
+    }
+
+    /* Add to existing styles */
+.sidebar .fa-university {
+    color: #fff;
+    transition: transform 0.3s ease;
+}
+
+.sidebar h5 {
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.dropdown-toggle {
+    text-decoration: none;
+}
+
+.dropdown-toggle:hover {
+    text-decoration: none;
+    opacity: 0.9;
+}
+.semester-card {
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.semester-card:hover {
+    transform: scale(1.03);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+    /* Add this to existing media queries if needed */
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="p-3">
+            <div class="d-flex align-items-center justify-content-center mb-4">
+                <i class="fas fa-university fa-2x me-2"></i>
+                <h5 class="m-0">KTU Activity Points</h5>
+            </div>
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a href="#dashboard" class="nav-link active" data-section="dashboard">
+                        <i class="fas fa-home"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#reports" class="nav-link" data-section="reports">
+                        <i class="fas fa-file-alt"></i> Reports
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Header -->
+        <header class="header">
+            <div class="d-flex justify-content-between align-items-center">
+                <button class="btn btn-link d-md-none" id="sidebarToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="d-flex align-items-center">
+                    <!-- Update the dropdown menu in the header -->
+                    <div class="dropdown">
+                        <button class="btn btn-link dropdown-toggle d-flex align-items-center" type="button" id="profileDropdown" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-circle fa-lg me-2"></i>
+                            <span class="d-none d-md-inline">{{ current_user.name }}</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="#profile" data-section="profile">Profile</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('logout') }}">Logout</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Modified Dashboard Section -->
+<div id="dashboard" class="dashboard-section active">
+    <h2 class="mb-4">Semester-wise Activity Overview</h2>
+    <!-- Change the semester cards container div -->
+    <div class="row row-cols-1 row-cols-md-4 g-4 mb-4" id="maindiv">
+      {% for sem in semester_data %}
+      <div class="col">
+        <div class="card semester-card {{ ['bg-primary', 'bg-success', 'bg-warning', 'bg-info'][loop.index0 % 4] }} text-white"
+             data-semester="{{ sem.semester }}">
+          <div class="card-body text-center">
+            <div class="semester-number">S{{ sem.semester }}</div>
+            <div>Activities: {{ sem.total }}</div>
+            <span class="semester-status badge bg-success">Approved: {{ sem.approved }}</span>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Semester Details Section (Hidden by default) -->
+    <div id="semester-details" class="dashboard-subsection" style="display: none;">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 id="semester-title">Semester Details</h3>
+            <button class="btn btn-outline-secondary" onclick="showMainDashboard()">
+                <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+            </button>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover" id="semesterActivitiesTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Student Name</th>
+                                <th>Activity</th>
+                                <th>Points</th>
+                                <th>Verified Faculty</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Data will be populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+            <!-- Reports Section -->
+            <div id="reports" class="dashboard-section">
+                <h2 class="mb-4">Generate Reports</h2>
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-3">
+                                <label class="form-label">Batch</label>
+                                <select class="form-select" id="batchFilter">
+                                    <option value="">All Batches</option>
+                                    <option>2020-2024</option>
+                                    <option>2021-2025</option>
+                                    <option>2022-2026</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Year</label>
+                                <select class="form-select" id="yearFilter">
+                                    <option value="">Combined</option>
+                                    <option>1</option>
+                                    <option>2</option>
+                                    <option>3</option>
+                                    <option>4</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Semester</label>
+                                <select class="form-select" id="semesterFilter">
+                                    <option value="">All Semesters</option>
+                                    <option>S1</option>
+                                    <option>S2</option>
+                                    <option>S3</option>
+                                    <option>S4</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Activity Type</label>
+                                <select class="form-select" id="activityTypeFilter">
+                                    <option value="">All Types</option>
+                                    <option>Technical</option>
+                                    <option>Sports</option>
+                                    <option>Cultural</option>
+                                    <option>Academic</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-2">
+                                <label class="form-label">Search</label>
+                                <input type="text" class="form-control" id="searchInput" placeholder="Search...">
+                            </div>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="reportTable">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Student Name</th>
+                                        <th>Batch</th>
+                                        <th>Semester</th>
+                                        <th>Year</th>  <!-- Add this column -->
+                                        <th>Activity Type</th>
+                                        <th>Activity Name</th>
+                                        <th>Points</th>
+                                    </tr>
+                                </thead>
+                               <tbody id="reportTableBody">
+                                   {% for activity in activity_list %}
+                                   <tr>
+                                       <td>{{ activity.student_name }}</td>
+                                       <td>{{ activity.batch }}</td>
+                                       <td>{{ activity.semester }}</td>
+                                       <td>{{ activity.year }}</td>  <!-- Display year -->
+                                       <td>{{ activity.category }}</td>
+                                       <td>{{ activity.activity_name }}</td>
+                                       <td>{{ activity.points }}</td>
+                                   </tr>
+                                   {% endfor %}
+                               </tbody>
+
+
+                            </table>
+                        </div>
+
+                        <!-- Change the existing buttons to -->
+                        <button class="btn btn-primary" onclick="exportToPDF()">
+                            <i class="fas fa-file-pdf"></i> Export PDF
+                        </button>
+                        <button class="btn btn-success" onclick="exportToExcel()">
+                            <i class="fas fa-file-excel"></i> Export Excel
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add these new sections below the existing reports section -->
+            <!-- Profile Section -->
+            <!-- Update HOD Profile Section -->
+<div id="profile" class="dashboard-section">
+    <h2 class="mb-4">HOD Profile</h2>
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-md-9">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <dl class="row mb-0">
+                                <dt class="col-sm-4">Name:</dt>
+                                <dd class="col-sm-8">{{ current_user.name }}</dd>
+
+                                <dt class="col-sm-4">Department:</dt>
+                                <dd class="col-sm-8">{{ current_user.department }}</dd>
+
+                                <dt class="col-sm-4">Email:</dt>
+                                <dd class="col-sm-8">{{ current_user.email }}</dd>
+                            </dl>
+                        </div>
+                        <div class="col-md-6">
+                            <dl class="row mb-0">
+                                <dt class="col-sm-4">Last Login:</dt>
+                                <dd class="col-sm-8">
+                                    {% if current_user.last_login %}
+                                        {{ current_user.last_login.strftime('%Y-%m-%d %H:%M:%S') }}
+                                    {% else %}
+                                        Never logged in
+                                    {% endif %}
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+        </main>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    <script>
+
+
+    function showSemesterDetails(semester) {
+        document.getElementById('dashboard').querySelector('.row').style.display = 'none';
+        document.getElementById('semester-details').style.display = 'block';
+        document.getElementById('semester-title').textContent = `Semester S${semester} Activities`;
+
+        const tbody = document.querySelector('#semesterActivitiesTable tbody');
+        tbody.innerHTML = '';
+
+        semesterData[semester].forEach(activity => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${activity.student}</td>
+                <td>${activity.activity}</td>
+                <td>${activity.points}</td>
+                <td>${activity.faculty}</td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+
+    function showMainDashboard() {
+        document.getElementById('dashboard').querySelector('.row').style.display = '';
+        document.getElementById('semester-details').style.display = 'none';
+    }
+
+
+    // Report Filtering Functionality
+function filterReports() {
+    const batch = document.getElementById('batchFilter').value.toLowerCase();
+    const semester = document.getElementById('semesterFilter').value.toLowerCase();
+    const year = document.getElementById('yearFilter').value.toLowerCase();
+    const activityType = document.getElementById('activityTypeFilter').value.toLowerCase();
+    const search = document.getElementById('searchInput').value.toLowerCase();
+
+    document.querySelectorAll('#reportTable tbody tr').forEach(row => {
+        const rowBatch = row.cells[1].textContent.toLowerCase();
+        const rowSemester = row.cells[2].textContent.toLowerCase();
+        const rowYear = row.cells[3].textContent.toLowerCase();
+        const rowActivityType = row.cells[4].textContent.toLowerCase();
+        const rowData = row.textContent.toLowerCase();
+
+        const batchMatch = !batch || rowBatch === batch;
+        const semesterMatch = !semester || rowSemester === semester;
+        const yearMatch = !year || rowYear === year;
+        const activityTypeMatch = !activityType || rowActivityType === activityType;
+        const searchMatch = !search || rowData.includes(search);
+
+        row.style.display = (batchMatch && semesterMatch && yearMatch && activityTypeMatch && searchMatch)
+            ? '' : 'none';
+    });
+}
+
+// Attach event listeners for filters
+document.querySelectorAll('#batchFilter, #semesterFilter, #yearFilter, #activityTypeFilter, #statusFilterReport, #searchInput')
+    .forEach(element => {
+        element.addEventListener('change', filterReports);
+    });
+document.getElementById('searchInput').addEventListener('input', filterReports);
+
+// Modified Export Functions
+async function exportToPDF() {
+    // Initialize jsPDF
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF('l', 'pt'); // Landscape mode for better table fit
+
+    // Get visible rows
+    const visibleRows = Array.from(document.querySelectorAll('#reportTable tbody tr'))
+                           .filter(tr => tr.style.display !== 'none');
+
+    // Prepare data
+    const headers = Array.from(document.querySelectorAll('#reportTable thead th'))
+                     .map(th => th.innerText);
+
+    const data = visibleRows.map(tr =>
+        Array.from(tr.cells).map(td => td.innerText)
+    );
+
+    // Create PDF
+    doc.autoTable({
+        head: [headers],
+        body: data,
+        styles: { fontSize: 8 },
+        headStyles: { fillColor: [41, 128, 185] },
+        margin: { top: 20 },
+        didDrawPage: function (data) {
+            // Add header
+            doc.setFontSize(18);
+        }
+    });
+
+    doc.save('KTU_Activity_Report.pdf');
+}
+
+async function exportToExcel() {
+    // Get table data
+    const headers = Array.from(document.querySelectorAll('#reportTable thead th'))
+                     .map(th => th.innerText);
+
+    const rows = Array.from(document.querySelectorAll('#reportTable tbody tr:not([style*="display: none"]'))
+                   .map(tr => Array.from(tr.cells).map(td => td.innerText));
+
+    // Create worksheet
+    const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+
+    // Create workbook
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Activity Report");
+
+    // Save file
+    XLSX.writeFile(wb, 'KTU_Activity_Report.xlsx');
+}
+
+// Update the navigation handler to include dropdown items
+document.querySelectorAll('[data-section]').forEach(link => {
+    link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const sectionId = this.getAttribute('data-section');
+
+        document.querySelectorAll('[data-section]').forEach(el => el.classList.remove('active'));
+        this.classList.add('active');
+
+        document.querySelectorAll('.dashboard-section').forEach(section => {
+            section.classList.remove('active');
+        });
+        document.getElementById(sectionId).classList.add('active');
+    });
+});
+    </script>
+<script>
+/*function fetchActivities() {
+    fetch('/hod_dashboard', { headers: { "X-Requested-With": "XMLHttpRequest" } })
+        .then(response => response.json())
+        .then(data => {
+            let tableBody = document.getElementById("reportTableBody");
+            tableBody.innerHTML = ""; // Clear existing data
+
+            data.forEach(activity => {
+                let row = `
+                    <tr>
+                        <td>${activity.student_name}</td>
+                        <td>${activity.activity}</td>
+                        <td>${activity.points}</td>
+                        <td>${activity.faculty}</td>
+                        <td>${activity.date}</td>
+                        <td>${activity.status}</td>
+                    </tr>`;
+                tableBody.innerHTML += row;
+            });
+        })
+        .catch(error => console.error("Error fetching data:", error));
+}*/
+
+// Auto-refresh data every 5 seconds
+setInterval(fetchActivities, 5000);
+
+// Fetch data immediately on page load
+document.addEventListener("DOMContentLoaded", fetchActivities);
+</script>
+<!-- Add this script section at the bottom of hod.html -->
+<script>
+    // Add click handlers to semester cards
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.semester-card').forEach(card => {
+            card.addEventListener('click', function() {
+                const semester = this.dataset.semester;
+                showSemesterDetails(semester);
+            });
+        });
+    });
+
+    // Modified showSemesterDetails function
+    async function showSemesterDetails(semester) {
+        try {
+            const response = await fetch(`/get_semester_activities/${semester}`);
+            const activities = await response.json();
+
+            document.getElementById('dashboard').querySelector('.row').style.display = 'none';
+            document.getElementById('semester-details').style.display = 'block';
+            document.getElementById('semester-title').textContent = `Semester S${semester} Activities`;
+
+            const tbody = document.querySelector('#semesterActivitiesTable tbody');
+            tbody.innerHTML = '';
+
+            activities.forEach(activity => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${activity.student_name}</td>
+                    <td>${activity.activity_name}</td>
+                    <td>${activity.points_awarded}</td>
+                    <td>${activity.faculty_name}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        } catch (error) {
+            console.error('Error fetching semester details:', error);
+        }
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KTU Activity Point Management System</title>
+    <link rel="stylesheet" href="/static/login.css">
+</head>
+<body>
+
+
+    <!-- Login Section -->
+    <section id="login">
+        <div class="login-container">
+            <h2>Login to Your Account</h2>
+            <form action="/login" method="POST">
+
+
+            <input type="text" placeholder="Email/Username" name="email">
+            <input type="password" placeholder="Password" name="password">
+            <button type="submit">Login</button>
+            </form>
+            <div class="foot">
+            <p><a href="#password">Forgot Password?</a>
+            </div>
+            <div class="foot2"> <a href="{{ url_for('signup') }}">SignUp</a></p>
+            </div>
+        </div>
+    </section>
+</body>
+</html>

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>KTU Activity Point Management System - Faculty Dashboard</title>
+    <link rel="stylesheet" href="/static/facdash.css" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+  </head>
+  <body>
+  <header class="topbar">
+        <div class="user-info">
+            <a href="{{url_for('home')}}" class="home-link"> Home</a>
+            <a href="{{url_for('login')}}" class="home-link">Logout</a>
+        </div>
+    </header>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo"><h2>KTU Activity Point System</h2></div>
+      <nav class="sidebar-menu">
+        <a href="{{ url_for('faculty_dashboard') }}" class="menu-item active"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+        <a href="{{ url_for('students') }}" class="menu-item"><i class="fas fa-user-graduate"></i> Students</a>
+        <a href="{{ url_for('faculty_activities') }}" class="menu-item "><i class="fas fa-clipboard-check"></i> Activities</a>
+        <a href="{{ url_for('faculty_reports') }}" class="menu-item"><i class="fas fa-file-alt"></i> Reports</a>
+      </nav>
+    </aside>
+
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+
+      <div class="dashboard">
+        <h1 class="page-title">Activity Management Dashboard</h1>
+
+        <!-- Filters -->
+        <div class="filters">
+          <div class="filter-row">
+            <div class="filter-group">
+              <label for="batch">Batch</label>
+              <select id="batch"><option value="">All Batches</option></select>
+            </div>
+            <div class="filter-group">
+              <label for="semester">Semester</label>
+              <select id="semester"><option value="">All Semesters</option></select>
+            </div>
+            <div class="filter-group">
+              <label for="activity-type">Activity Type</label>
+              <select id="activity-type"><option value="">All Activities</option></select>
+            </div>
+          </div>
+          <div class="filter-actions">
+            <button class="btn btn-outline" id="resetFilters"><i class="fas fa-redo"></i> Reset</button>
+            <button class="btn btn-primary" id="applyFilters"><i class="fas fa-search"></i> Apply Filters</button>
+          </div>
+        </div>
+
+        <!-- Activity List -->
+       <div class="activity-list" id="activityContainer"></div>
+     <script>
+  async function loadFilters() {
+      const response = await fetch("/get_filter_data");
+      const filterData = await response.json();
+
+      // Populate Batch Filter
+      const batchSelect = document.getElementById("batch");
+      batchSelect.innerHTML = '<option value="">All Batches</option>';
+      filterData.batches.forEach(batch => {
+          batchSelect.innerHTML += `<option value="${batch}">${batch}</option>`;
+      });
+
+      // Populate Semester Filter
+      const semesterSelect = document.getElementById("semester");
+      semesterSelect.innerHTML = '<option value="">All Semesters</option>';
+      filterData.semesters.forEach(sem => {
+          semesterSelect.innerHTML += `<option value="${sem}">${sem}</option>`;
+      });
+
+      // Populate Activity Type Filter
+      const activitySelect = document.getElementById("activity-type");
+      activitySelect.innerHTML = '<option value="">All Activities</option>';
+      filterData.activity_types.forEach(type => {
+          activitySelect.innerHTML += `<option value="${type}">${type}</option>`;
+      });
+  }
+
+  document.addEventListener("DOMContentLoaded", loadFilters);          async function loadActivities() {
+            const response = await fetch("/get_faculty_activities");
+            const activities = await response.json();
+
+            const container = document.getElementById("activityContainer");
+            container.innerHTML = activities.length ? "" : "<p>No pending activities</p>";
+
+            activities.forEach(activity => {
+                const activityCard = document.createElement("div");
+                activityCard.classList.add("activity-card"); // Ensure this class is in CSS
+                activityCard.innerHTML = `
+                    <h3>${activity.activity_name}</h3>
+                    <p>Student: ${activity.student_name}</p>
+                    <p>Department: ${activity.department}</p>
+                    <p>Requested Points: <input type="number" id="points-${activity.submission_id}" value="${activity.points}" min="0"></p>
+            <button onclick="updatePoints(${activity.submission_id})">Update Points</button>
+            <button onclick="approveActivity(${activity.submission_id})">Approve</button>
+            <button onclick="rejectActivity(${activity.submission_id})">Reject</button>
+                `;
+                container.appendChild(activityCard);
+            });
+        }
+
+
+  async function approveActivity(submissionId) {
+    const points = document.getElementById(`points-${submissionId}`).value;
+    await fetch("/approve_activity", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            submission_id: submissionId,
+            action: "approve",
+            points_awarded: points  // Include points
+        })
+    });
+    loadActivities();
+}
+
+  async function rejectActivity(submissionId) {
+      await fetch("/approve_activity", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ submission_id: submissionId, action: "reject" })
+      });
+      loadActivities(); // Refresh list
+  }
+  async function loadFilters() {
+      const response = await fetch("/get_filter_data");
+      const filterData = await response.json();
+
+      // Populate Batch Filter
+      const batchSelect = document.getElementById("batch");
+      batchSelect.innerHTML = '<option value="">All Batches</option>';
+      filterData.batches.forEach(batch => {
+          batchSelect.innerHTML += `<option value="${batch}">${batch}</option>`;
+      });
+
+      // Populate Semester Filter
+      const semesterSelect = document.getElementById("semester");
+      semesterSelect.innerHTML = '<option value="">All Semesters</option>';
+      filterData.semesters.forEach(sem => {
+          semesterSelect.innerHTML += `<option value="${sem}">${sem}</option>`;
+      });
+
+      // Populate Activity Type Filter
+      const activitySelect = document.getElementById("activity-type");
+      activitySelect.innerHTML = '<option value="">All Activities</option>';
+      filterData.activity_types.forEach(type => {
+          activitySelect.innerHTML += `<option value="${type}">${type}</option>`;
+      });
+  }
+
+  document.addEventListener("DOMContentLoaded", loadFilters);
+  document.addEventListener("DOMContentLoaded", loadActivities);
+</script>
+
+  </body>
+</html>

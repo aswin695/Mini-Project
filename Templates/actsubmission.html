@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activity Submission</title>
+    <link rel="stylesheet" href="/static/actsubm.css">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h2>KTU Activity Point Management System</h2>
+        <nav>
+             <a href="{{ url_for('student_dashboard') }}" class="menu-item "><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+            <a href="{{ url_for('activity_submission') }}" class="menu-item active"><i class="fas fa-baa-aa"></i> Activity submission</a>
+            <a href="{{ url_for('reports') }}" class="menu-item"><i class="fas fa-chart-bar"></i> Reports</a>
+        </nav>
+    </div>
+
+    <!-- Top bar -->
+    <header class="top-bar">
+        <div class="user-info">
+            <i class="fas fa-user-circle"></i>
+            <span id="student-name">{{ session['user_name'] }}</span>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="content">
+        <div class="submission-container">
+            <h2>Activity Submission</h2>
+
+            <form action="{{ url_for('activity_submission') }}" method="post">
+
+                <!-- Select Activity Type -->
+                <div class="form-group">
+                    <label for="activity-type">Activity Type:</label>
+                    <select id="activity-type" name="activity_id" required>
+                          <option value="" disabled selected>Select Activity</option>
+                          {% for activity in activities %}
+                               <option value="{{ activity.id }}">{{ activity.name }}</option>
+                          {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Select Date -->
+                <div class="form-group">
+                    <label for="activity-date">Date:</label>
+                    <input type="date" id="activity-date" name="activity_date" required>
+                </div>
+
+
+
+                <!-- Enter Duration -->
+                <div class="form-group">
+                    <label for="activity-duration">Duration (Hours):</label>
+                    <input type="number" id="activity-duration" name="activity_duration" min="1" required>
+                </div>
+
+                <!-- Google Drive Certificate Link -->
+                <div class="form-group">
+                    <label for="certificate-link">Google Drive Certificate Link:</label>
+                    <input type="url" id="certificate-link" name="certificate_link" placeholder="https://drive.google.com/..." required>
+                </div>
+
+                <!-- Submit & Reset Buttons -->
+                <div class="button-group">
+                    <button type="reset" class="reset-btn">Reset</button>
+                    <button type="submit" class="submit-btn">Submit Activity</button>
+                </div>
+
+            </form>
+        </div>
+    </main>
+
+</body>
+</html>

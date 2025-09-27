@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KTU Activity Point Management System</title>
+    <link rel="stylesheet" href="/static/home.css">
+</head>
+<body>
+    <!-- Home Section -->
+    <section id="home">
+        <header>
+            <h1>KTU ACTIVITY POINT MANAGEMENT SYSTEM</h1>
+            <nav>
+                <a href="{{ url_for('home') }}">Home</a>
+                <a href="{{ url_for('guidelines') }}">Rules</a>
+                <a href="{{ url_for('login') }}">Login</a>
+            </nav>
+        </header>
+        <div class="hero">
+            <h2>Track, Manage, and Verify Your Activity Points</h2>
+            <p>A seamless way to manage extracurricular activity points for students, teachers, and HODs.</p>
+            <button onclick="location.href='{{ url_for('login') }}'">Login Now</button>
+        </div>
+        <div class="features">
+            <div class="feature">
+                <h3>📄 Student Features</h3>
+                <p>Upload certificates, track activity points.</p>
+            </div>
+            <div class="feature">
+                <h3>👩‍🏫 Teacher Features</h3>
+                <p>Review and verify student submissions. Generate reports.</p>
+            </div>
+            <div class="feature">
+                <h3>🎓 HOD Features</h3>
+                <p>Generate reports and oversee records.</p>
+            </div>
+        </div>
+    </section>
+</body>
+</html>
